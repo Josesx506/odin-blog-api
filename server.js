@@ -20,6 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // CORS middleware
 app.use(credentials);
+app.options('/v1/*path', cors(corsOptions)); // Preflight cors
 app.use(cors(corsOptions));
 
 // Middleware for auth
@@ -31,6 +32,9 @@ app.use('/v1/auth',authRouter);        // Authentication routes
 app.use('/v1/cms',adminRouter);        // CMS author & admin routes
 app.use('/v1/basic',basicRouter);      // Basic user routes
 app.get('/v1/freemium',getMostRecent); // Free api route
+app.get('/',(req,res)=>{
+  res.send('Welcome to the blog express api')
+})
 
 // Error Handler
 app.use((err, req, res, next) => {

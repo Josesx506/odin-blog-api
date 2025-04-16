@@ -10,7 +10,7 @@ const allowedOrigins = [
 
 const cookieOptions = {
   httpOnly: true,
-  sameSite: 'Strict',
+  sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
   secure: process.env.NODE_ENV === 'production',
   maxAge: 24 * 60 * 60 * 1000,
 }
