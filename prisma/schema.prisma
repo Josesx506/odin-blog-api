@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model BlogSession {
+  id        String   @id
+  sid       String   @unique
+  data      String   @db.Text
+  expiresAt DateTime
+}
+
+model BlogUser {
+  id       Int           @id @default(autoincrement())
+  name     String
+  email    String        @unique
+  password String
+  token    String?
+  role     BlogRole      @default(USER)
+  posts    BlogPost[]
+  comments BlogComment[]
+}
+
+model BlogPost {
+  id        Int           @id @default(autoincrement())
+  title     String
+  body      String
+  authorId  Int
+  author    BlogUser      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  published Boolean       @default(false)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  comments  BlogComment[]
+}
+
+model BlogComment {
+  id        Int      @id @default(autoincrement())
+  body      String
+  authorId  Int
+  author    BlogUser @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  postId    Int
+  post      BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum BlogRole {
+  ADMIN
+  AUTHOR
+  USER
+  GUEST
+}
