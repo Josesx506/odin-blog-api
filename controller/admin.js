@@ -1,4 +1,5 @@
 import { ROLES } from "../config/roles.js";
+import DOMPurify from 'isomorphic-dompurify';
 import {
   createDBComment, createDBPost,
   deleteCommentById, deleteOwnCommentDB,
@@ -55,7 +56,14 @@ async function getOnePremiumPost(req,res) {
 async function createPost(req,res) {
   try {
     const { title, body, published } = req.body;
-    const post = await createDBPost(req.user.id, title, body, published);
+    const options = {
+      ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'ul', 'ol', 'li', 
+        'br', 'img', 'h1', 'h2', 'h3', 'h4', 'h5'],
+      ALLOWED_ATTR: ['href','src','alt','title','style','height','width'],
+      KEEP_CONTENT: true,
+    }
+    const cleanBody = DOMPurify.sanitize(body, options);
+    const post = await createDBPost(req.user.id, title, cleanBody, published);
     return res.status(200).json(post);
   } catch(err) {
     return res.status(404).json({ message: "Post creation failed" });
@@ -78,8 +86,15 @@ async function updateOwnPost(req,res) {
   try {
     const { postId } = req.params;
     const { title, body, published } = req.body;
+    const options = {
+      ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'ul', 'ol', 'li', 
+        'br', 'img', 'h1', 'h2', 'h3', 'h4', 'h5'],
+      ALLOWED_ATTR: ['href','src','alt','title','style','height','width'],
+      KEEP_CONTENT: true,
+    }
+    const cleanBody = DOMPurify.sanitize(body, options);
     
-    const post = await updatePost(req.user.id, postId, title, body, published);
+    const post = await updatePost(req.user.id, postId, title, cleanBody, published);
     
     return res.status(200).json(post);
 
